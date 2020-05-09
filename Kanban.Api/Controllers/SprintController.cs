@@ -46,9 +46,15 @@ namespace Kanban.Api.Controllers
 
         [HttpPost]
         [Route("")]
-        public async Task<IActionResult> CreateNewSprint([FromBody]Sprint sprint)
+        public async Task<IActionResult> CreateNewSprint([FromBody]AddSprintRequestModel sprint)
         {
-            await _sprintRepository.Create(sprint);
+            await _sprintRepository.Create(new Sprint
+            {
+                StartDate = sprint.StartDate,
+                AdditionalInformation = sprint.AdditionalInformation,
+                EndDate = sprint.EndDate,
+                SprintGoal = sprint.SprintGoal
+            });
 
             return Ok();
         }

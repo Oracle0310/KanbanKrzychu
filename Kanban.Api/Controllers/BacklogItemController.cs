@@ -58,9 +58,15 @@ namespace Kanban.Api.Controllers
 
         [HttpPost]
         [Route("")]
-        public async Task<IActionResult> CreateBacklogItem([FromBody]BacklogItem backlogItem)
+        public async Task<IActionResult> CreateBacklogItem([FromBody]AddBacklogItemRequestModel backlogItem)
         {
-            await _backlogItemRepository.Create(backlogItem);
+            await _backlogItemRepository.Create(new BacklogItem
+            {
+                EstimatedTime = backlogItem.EstimatedTime,
+                Created = backlogItem.Created,
+                Description = backlogItem.Description,
+                Title = backlogItem.Title
+            });
 
             return Ok();
         }
@@ -91,9 +97,14 @@ namespace Kanban.Api.Controllers
 
         [HttpPost]
         [Route("{id}/tasks")]
-        public async Task<IActionResult> AddTaskToBacklogItem(int id, [FromBody]ItemTask task)
+        public async Task<IActionResult> AddTaskToBacklogItem(int id, [FromBody]AddTaskRequestModel task)
         {
-            await _backlogItemRepository.AddTask(task, id);
+            await _backlogItemRepository.AddTask(new ItemTask
+            {
+                Created = DateTime.Now,
+                Description = task.Description,
+                Title = task.Title
+            }, id);
 
             return Ok();
         }
