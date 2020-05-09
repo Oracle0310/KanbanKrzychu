@@ -1,36 +1,66 @@
 ﻿using Kanban.Domain.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Kanban.Database;
+using Kanban.Database.Entities;
+using Kanban.Domain.Mappers;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kanban.Domain.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        public Task Create(User user)
+        private readonly KanbanDbContext _context;
+
+        public UserRepository(KanbanDbContext context)
         {
-            throw new NotImplementedException();
+            _context = context;
         }
 
-        public Task Delete(int id)
+        public async Task Create(User user)
         {
-            throw new NotImplementedException();
+            _context.Users.Add(user.ToEntity());
+
+            await _context.SaveChangesAsync();
         }
 
-        public Task<User> Get(int id)
+        public async Task Delete(int id)
         {
-            throw new NotImplementedException();
+            var userToRemove = await _context.Users.FirstOrDefaultAsync(user => user.Id == id);
+
+            if(userToRemove == default)
+                throw new Exception("Provided user id is invalid.");
+
+            _context.Users.Remove(userToRemove);
+
+            await _context.SaveChangesAsync();
         }
 
-        public Task<IEnumerable<User>> Get()
+        public async Task<User> Get(int id)
         {
-            throw new NotImplementedException();
+            return (await _context.Users.FirstOrDefaultAsync(user => user.Id == id)).ToModel();
         }
 
-        public Task Update(User user)
+        public async Task<IEnumerable<User>> Get()
         {
-            throw new NotImplementedException();
+            return (await _context.Users.ToListAsync()).Select(user => user.ToModel());
+        }
+
+        public async Task Update(User user)
+        {
+            var userToUpdate = await _context.Users.FirstOrDefaultAsync(user => user.Id == user.Id);
+
+            if(userToUpdate == default)
+                throw new Exception("Provided user id is invalid");
+
+            userToUpdate.Email = user.Email;
+            userToUpdate.Name = user.Name;
+            userToUpdate.Surname = user.Surname;
+
+            await _context.SaveChangesAsync();
         }
     }
 }
